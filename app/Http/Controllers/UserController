@@ -1,0 +1,383 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Helpers\sendEmailHelper;
+use App\Onboarding;
+use App\User;
+use Exception;
+use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Ramsey\Uuid\Uuid;
+use SoapClient;
+use stdClass;
+use Validator;
+
+class UserController extends Controller
+{
+    public function saveUser(Request $request, User $user)
+    {
+        $searchUser = User::where('rut', $request->rut)->first();
+        if (!$searchUser) {
+            return response()->json(
+                array(
+                    'statusCode' => 401,
+                    'message' => 'El rut no existe',
+                ),
+                401
+            );
+        }
+
+        if ($searchUser->status == 1) {
+            return response()->json(
+                array(
+                    'statusCode' => 401,
+                    'message' => 'Usuario ya existe',
+                ),
+                401
+            );
+        }
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'rut' => 'required',
+                'password' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->messages(),
+                'statusCode' => 404,
+            ]);
+        }
+
+        $user = User::find($searchUser->id);
+        $user->status = 1;
+        $user->password = Hash::make($request->password);
+        $user->save();
+        $user->password = $request->password;
+        $token = $this->getToken($user);
+        return response()->json($token);
+    }
+
+    public function login(Request $request)
+    {
+        $token = $this->getToken($request);
+        if ($token['statusCode'] == '401') {
+            return response()->json($token, 401);
+        }
+        return response()->json($token, 200);
+    }
+
+    public function completeData(Request $request)
+    {
+dd($request);
+        $user = auth()->user();
+
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'email' => 'required',
+                'phone' => 'required',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => $validator->messages(),
+                'statusCode' => 404,
+            ]);
+        }
+
+        $userUpdate = User::find($user->id);
+        $userUpdate->personal_mail = $request->email;
+        $userUpdate->phone = $request->phone;
+        $userUpdate->save();
+        if ($userUpdate->werks) {
+            $userUpdate->region = substr($userUpdate->werks, 0, 2);
+        }
+        if ($userUpdate->persk == 06) {
+            $userUpdate->position = 'SERVICIOS';
+        } elseif ($userUpdate->persk == '01') {
+            $userUpdate->position = 'DIRECTIVOS';
+        } elseif ($userUpdate->persk == '02') {
+            $userUpdate->position = 'JEFATURA';
+        } elseif ($userUpdate->persk == '03') {
+            $userUpdate->position = 'PROFESIONALES';
+        } elseif ($userUpdate->persk == '04') {
+            $userUpdate->position = 'TÉCNICOS';
+        } elseif ($userUpdate->persk == '05') {
+            $userUpdate->position = 'ADMINISTRATIVOS';
+        }
+
+        return response()->json(
+            [
+                'user' => $userUpdate,
+                'status' => true,
+            ]
+        );
+    }
+
+    public function recoverPassword($rut)
+    {
+        $user = User::where('rut', $rut)->where('status', 1)->first();
+        if ($user) {
+            $sendEmail = new sendEmailHelper();
+            $sendEmail->sendMail($user);
+            user::where('id', $user->id)->update(['email_verified_at' => date('Y-m-d H:m:s'), 'remember_token' => Uuid::uuid1()]);
+            return response()->json(['data' => "Mensaje enviado de forma exitosa, por favor verifique su correo"], 200);
+        } else {
+            return response()->json(['data' => "Ususario no existe"], 404);
+        }
+    }
+
+    public function getToken($user)
+    {
+        try {
+            $http = new \GuzzleHttp\Client;
+            $userDB = User::where('rut', $user->rut)->where('status', 1)->first();
+            $response = $http->post(getenv('APP_URL') . '/oauth/token', [
+                'form_params' => [
+                    'grant_type' => 'password',
+                    'client_id' => getenv('CLIENT_ID'),
+                    'client_secret' => getenv('CLIENT_SECRET'),
+                    'username' => $userDB->rut,
+                    'password' => $user->password,
+                    'scope' => '*',
+                ],
+            ]);
+            $dataJson = json_decode((string) $response->getBody(), true);
+            $payloadLogin = [
+                'access_token' => $dataJson['access_token'],
+                'user' => $userDB,
+            ];
+
+            return array(
+                'statusCode' => 200,
+                'data' => $payloadLogin,
+            );
+        } catch (Exception $e) {
+            return array(
+                'statusCode' => 401,
+                'message' => $e->getMessage(),
+            );
+        }
+    }
+
+    public function logoutApi()
+    {
+        if (Auth::check()) {
+            Auth::user()->token()->revoke();
+            return response()->json(['statusCode' => 200, 'message' => 'Usuario deslogeado'], 200);
+        } else {
+            return response()->json(['statusCode' => 200, 'error' => 'Existio un error inesperado'], 500);
+        }
+
+    }
+
+    public function getUserSoap()
+    {
+        ini_set('memory_limit', '200M');
+        ini_set('max_execution_time', 5000);
+
+        $login = env('LOGINSOAP');
+        $password = env('PASSWORDSOAP');
+
+        $webservice = new stdClass();
+        $webservice->client = null;
+        $webservice->message = "";
+
+        $wsdl = env('ENPOINTSAOAP');
+
+        $context = stream_context_create(
+            array(
+                'ssl' => array(
+                    'ciphers' => 'RC4-SHA',
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                ),
+
+                'http' => array(
+                    'protocol_version' => '1.0',
+                    'header' => 'Content-Type: text/xml;',
+                ),
+            )
+        );
+        $options = array(
+            "login" => $login,
+            "password" => $password,
+            'stream_context' => $context,
+            'encoding' => 'utf-8',
+            'trace' => 1,
+            "exception" => 0,
+            'verifyhost' => false,
+            'soap_version' => SOAP_1_2,
+            'trace' => 1,
+            'exceptions' => 1,
+            "connection_timeout" => 180,
+        );
+        $status = $this->test_connection($wsdl, $options);
+        if ($status === 200) {
+            $webservice2 = new SoapClient($wsdl, $options);
+            $antecedentes = $webservice2->__soapCall('ZwsAntecedentes', []);
+            $dataSave = [];
+            $i = 0;
+            dd(count($antecedentes->ETPersonas->item));
+            foreach ($antecedentes->ETPersonas->item as $key => $value) {
+                if ($i == 2000) {
+                    $i = 0;
+                    DB::table('users')->insert($dataSave);
+                    $dataSave = [];
+                }
+                $dataSave[] = [
+                    'name' => $value->Vorna . ' ' . $value->Name2,
+                    'surname' => $value->Midnm . ' ' . $value->Nachn,
+                    'rut' => $value->Pernr . $value->Dv,
+                    'dv' => $value->Dv,
+                    'werks' => $value->Werks,
+                    'address' => $value->Name1,
+                    'persk' => $value->Persk,
+                    'text20' => $value->Text20,
+                    'position' => $value->Stext,
+                    'tipest' => $value->Tipest,
+                    'phone' => $value->Celular,
+                    'politics' => $value->Politica,
+                    'email' => $value->Emailinst,
+                ];
+                $i++;
+            }
+            if (count($dataSave) > 0) {
+                DB::table('users')->insert($dataSave);
+            }
+            //dd($dataSave);
+            //User::insert($dataSave);
+            return response()->json(
+                [
+                    'status' => true,
+                    'data' => 'Existoso al guardar',
+                ]
+            );
+
+            //$webservice->client->__setCookie("MYSAPSSO2", $this->get_ssocookie());
+            //$webservice->client->__setCookie("sap-usercontext", "sap-client=" . $client);
+        } else if ($status === 401) {
+            $webservice->message = "Error: Authentication failed.";
+        } else {
+            $webservice->message = "Error: Webservice is down.";
+        }
+        return $webservice;
+    }
+
+    public function unlinkUser($rut)
+    {
+        $user = User::where('rut', $rut)->first();
+        if (!$user) {
+            return response()->json([
+                'sttusCode' => 200,
+                'Message' => 'Usuario No existente',
+            ], 404);
+        }
+
+        $user = User::where('id', $user->id)->update(['status' => 0]);
+        if ($user) {
+            return response()->json([
+                'sttusCode' => 200,
+                'Message' => 'Usuario eliminado de forma exitosa',
+            ], 200);
+        }
+        return response()->json([
+            'sttusCode' => 401,
+            'Message' => 'Existio un error al eliminar el usuario',
+        ]);
+    }
+    public function test_connection($wsdl, $options)
+    {
+        $ch = curl_init();
+
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'HEAD');
+        curl_setopt($ch, CURLOPT_URL, $wsdl);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_ENCODING, '');
+        curl_setopt($ch, CURLOPT_USERPWD, $options['login'] . ":" . $options['password']);
+
+        curl_exec($ch);
+        return curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    }
+    public function get_ssocookie()
+    {
+        $has_sso_cookie = false;
+        $sso_cookie = "";
+
+        if (isset($http_response_header) && !is_null($http_response_header)) {
+            foreach ($http_response_header as $header) {
+                $sso_position = stripos($header, "MYSAPSSO2");
+                $has_sso_cookie = $sso_position !== false;
+
+                if ($has_sso_cookie) {
+                    $parts = explode(";", Str::sub($header, $sso_position));
+                    $sso_cookie = Str::sub($parts[0], stripos($parts[0], "=") + 1);
+                    break;
+                }
+            }
+        }
+
+        return $sso_cookie;
+        $webservice = $this->connect();
+        $rawwsdata = $webservice->client->SAP_FUNCTION();
+    }
+
+    public function onboarding()
+    {
+        $onboarding = Onboarding::with(
+            [
+                'mediaRelation' => function ($query) {
+                    $query->where('collection_name', 'image_onboarding');
+                },
+            ]
+        )
+            ->get();
+        foreach ($onboarding as $data) {
+            $payloadOnboarding[] = [
+                'id' => $data->id,
+                'img' => [
+                    'src' => isset($data->mediaRelation[0]) ? $data->mediaRelation[0]->getUrl() : '',
+                    'alt' => isset($data->mediaRelation[0]) ? $data->mediaRelation[0]->name : '',
+                ],
+                'video' => $data->video,
+                'title' => $data->title,
+                'text' => $data->text,
+            ];
+        }
+        return response()->json($payloadOnboarding);
+    }
+
+    public function formRecoveryPassword($id)
+    {
+        $getUser = User::where('remember_token', $id)->first();
+        if ($getUser) {
+            return view('email.form_recovery_password');
+        }
+    }
+
+    public function saveRecoveryPassword(Request $request)
+    {
+        if ($request) {
+            $user = new User();
+            $user->password = Hash::make($getUser->password);
+            $user->remember_token = '';
+            $user->save();
+            $token = $this->getToken($user);
+            return response()->json($token);
+        }
+    }
+
+    public function notificate()
+    {
+        dd("Siii");
+    }
+}

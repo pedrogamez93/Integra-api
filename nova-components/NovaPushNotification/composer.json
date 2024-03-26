@@ -1,0 +1,37 @@
+{
+    "name": "meat/nova-push-notification",
+    "description": "A Laravel Nova tool to send push notifications via OneSignal",
+    "keywords": [
+        "laravel",
+        "nova",
+        "push",
+        "notifications",
+        "notification",
+        "push_notification",
+        "onesignal",
+        "one_signal"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.1.0",
+        "php-http/guzzle6-adapter": "^1.1",
+        "norkunas/onesignal-php-api": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Meat\\NovaPushNotification\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Meat\\NovaPushNotification\\ToolServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

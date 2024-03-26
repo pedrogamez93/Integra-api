@@ -1,0 +1,103 @@
+{
+    "name": "laravel/laravel",
+    "type": "project",
+    "description": "The Laravel Framework.",
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
+    "license": "MIT",
+    "require": {
+        "php": "^7.2",
+        "barryvdh/laravel-cors": "^0.11.4",
+        "benjacho/belongs-to-many-field": "^1.3",
+        "benjaminhirsch/nova-slug-field": "^1.2",
+        "coderello/laravel-nova-lang": "^1.3",
+        "ebess/advanced-nova-media-library": "^2.9",
+        "emilianotisato/nova-tinymce": "0.5.4",
+        "epartment/nova-dependency-container": "^1.2",
+        "fideloper/proxy": "^4.0",
+        "fourstacks/nova-repeatable-fields": "^1.3",
+        "google/recaptcha": "^1.3",
+        "laravel/framework": "^6.2",
+        "laravel/helpers": "^1.1",
+        "laravel/horizon": "^3.6",
+        "laravel/nova": "*",
+        "laravel/passport": "^8.0",
+        "laravel/tinker": "^1.0",
+        "maatwebsite/excel": "^3.1",
+        "maatwebsite/laravel-nova-excel": "^1.2",
+        "meat/list-rut": "*",
+        "meat/nova-push-notification": "*",
+        "nesbot/carbon": "^2.27",
+        "numaxlab/nova-ckeditor5-classic": "^1.1",
+        "ramsey/uuid": "^3.9",
+        "s-ichikawa/laravel-sendgrid-driver": "^2.1",
+        "titasgailius/search-relations": "^1.0",
+        "unisharp/laravel-filemanager": "1.9.2",
+        "waynestate/nova-ckeditor4-field": "^0.6.0",
+        "whitecube/nova-flexible-content": "^0.1.12",
+        "wsdl2phpgenerator/wsdl2phpgenerator": "^3.4",
+        "wsdltophp/packagebase": "^2.0",
+        "ziffdavis/nova-multiselect": "^0.2.1"
+    },
+    "require-dev": {
+        "facade/ignition": "^1.4",
+        "fzaninotto/faker": "^1.4",
+        "mockery/mockery": "^1.0",
+        "nunomaduro/collision": "^3.0",
+        "phpunit/phpunit": "^8.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "dont-discover": []
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "classmap": [
+            "database/seeds",
+            "database/factories"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "./nova"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/NovaPushNotification"
+        },
+        {
+            "type": "path",
+            "url": "./nova-components/ListRut"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "scripts": {
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ],
+        "post-root-package-install": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+        ],
+        "post-create-project-cmd": [
+            "@php artisan key:generate --ansi"
+        ]
+    }
+}

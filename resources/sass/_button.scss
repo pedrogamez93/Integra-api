@@ -1,0 +1,413 @@
+a:disabled,
+a[disabled] {
+  pointer-events: none;
+}
+
+.button {
+  @extend .btn;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  font-size: rem(15px);
+  font-weight: 700;
+  letter-spacing: rem(1px);
+  line-height: 1;
+  margin: 0;
+  max-width: 100%;
+  padding: 0;
+  text-align: center;
+  transition: 300ms ease;
+  text-transform: uppercase;
+  white-space: normal;
+
+  &:hover,
+  &:active,
+  &:focus {
+    box-shadow: none;
+    color: inherit;
+    outline: none;
+  }
+
+  &:disabled,
+  &[disabled] {
+    cursor: default;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+.button__text {
+  color: inherit;
+  display: block;
+  text-align: center;
+}
+
+.button__label {
+  color: rgba($white, 0.8);
+  display: block;
+  font-size: rem(14px);
+  font-weight: 400;
+  letter-spacing: rem(1px);
+  text-transform: none;
+}
+
+.button__icon {
+  color: inherit;
+  display: block;
+  font-size: 1rem;
+  text-align: center;
+
+  &:not(:empty) {
+    margin-left: rem(10px);
+    margin-right: rem(10px);
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
+  }
+}
+
+.button--columns {
+  flex-wrap: nowrap;
+  justify-content: space-between;
+
+  .button__text {
+    text-align: left;
+  }
+}
+
+.button--icon {
+  height: rem(28px);
+  width: rem(28px);
+}
+
+.button--icon.button--loading {
+  animation: spin 1000ms ease 0ms infinite normal both;
+}
+
+.button--icon.button--blue {
+  color: $color-01;
+}
+
+.button--icon.button--red {
+  color: $color-02;
+}
+
+.button--icon.button--green {
+  color: $color-03;
+}
+
+.button--icon.button--orange {
+  color: $color-06;
+}
+
+.button--icon.button--circle {
+  border-radius: 50%;
+  color: $white;
+}
+
+.button--icon.button--circle.button--blue {
+  background-color: $color-01;
+
+  &:active {
+    background-color: lighten($color-01, 20%);
+  }
+}
+
+.button--icon.button--circle.button--red {
+  background-color: $color-02;
+
+  &:active {
+    background-color: lighten($color-02, 20%);
+  }
+}
+
+.button--icon.button--circle.button--green {
+  background-color: $color-03;
+
+  &:active {
+    background-color: lighten($color-03, 20%);
+  }
+}
+
+.button--primary,
+.button--secondary,
+.button--tertiary {
+  border: 1px solid transparent;
+  border-radius: rem(30px);
+  box-shadow: 0 10px 20px 0 rgba($black, 0.2);
+  color: $white;
+  min-height: rem(56px);
+  min-width: rem(180px);
+  padding: rem(16px 25px);
+  transition: 500ms ease;
+  
+  &:focus,
+  &:active,
+  &:hover {
+    color: $white;
+  }
+
+  &:focus {
+    border: 1px solid transparent;
+    box-shadow: 0 10px 20px 0 rgba($black, 0.2);
+  }
+
+  &:active {
+    transform: translateY(5%);
+  }
+
+  .button__icon {
+    font-size: 1rem;
+  }
+}
+
+.button--small {
+  font-size: 12px;
+  min-height: 42px;
+  min-width: 0;
+  padding: 0.25em 1.25em;
+}
+
+.button--primary {
+  background-color: $primary;
+
+  &:active {
+    background-color: lighten($primary, 10%);
+  }
+}
+
+.button--primary.button--red,
+.button--secondary.button--red {
+  background-color: $color-02;
+
+  &:active {
+    background-color: lighten($color-02, 10%);
+  }
+}
+
+.button--primary.button--orange,
+.button--secondary.button--orange {
+  background-color: $color-06;
+
+  &:active {
+    background-color: lighten($color-06, 10%);
+  }
+}
+
+.button--primary.button--white,
+.button--secondary.button--white {
+  background-color: $white;
+  color: $color-08;
+
+  &:active {
+    background-color: darken($white, 20%);
+    color: $color-08;
+  }
+}
+
+.button--primary.button--purple,
+.button--secondary.button--purple {
+  background-color: $color-05;
+  color: $white;
+
+  &:active {
+    background-color: darken($color-05, 20%);
+    color: $white;
+  }
+}
+
+.button--play {
+  background-color: rgba($secondary, 0.6);
+  border: 3px solid $secondary;
+  border-radius: 50%;
+  box-shadow: 0 10px 20px 0 rgba($secondary, 0.6);
+  color: $white;
+  font-size: rem(30px);
+  height: rem(64px);
+  width: rem(64px);
+
+  &:hover,
+  &:active,
+  &:focus {
+    box-shadow: 0 10px 20px 0 rgba($secondary, 0.6);
+    color: $white;
+  }
+
+  &:active {
+    background-color: $secondary;
+  }
+
+  .button__icon {
+    font-size: rem(30px);
+  }
+}
+
+// .button--secondary {
+//   background-color: transparent;
+//   border-color: $primary;
+//   color: $primary;
+
+//   &:hover {
+//     background-color: $primary;
+//     color: $white;
+//   }
+// }
+
+// .button--tertiary {
+//   background-color: $secondary;
+//   border-color: $secondary;
+//   color: $white;
+//   font-weight: 900;
+
+//   &:hover {
+//     background-color: transparent;
+//     color: $white;
+//   }
+// }
+
+.button--simple {
+  color: $primary;
+
+  &:hover {
+    color: $primary;
+
+    .button__icon {
+      background-color: $secondary;
+    }
+  }
+
+  .button__icon {
+    background-color: $primary;
+    border-radius: 50%;
+    color: $white;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    height: 28px;
+    transition: 300ms ease;
+    width: 28px;
+  }
+}
+
+.button--slider {
+  color: $secondary;
+  height: 36px;
+  width: 36px;
+
+  &:hover {
+    color: $primary;
+  }
+
+  .button__icon {
+    font-size: 20px;
+  }
+}
+
+.button--social {
+  background-color: $primary;
+  border-radius: 50%;
+  color: $white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50px;
+  width: 50px;
+
+  &:hover {
+    background-color: $secondary;
+    color: $white;
+  }
+
+  .button__icon {
+    font-size: 20px;
+  }
+}
+
+.button--link {
+  font-size: inherit;
+  font-weight: 400;
+  letter-spacing: rem(0.67px);
+  text-transform: none;
+}
+
+.button--link.button--blue {
+  color: $color-01;
+}
+
+.button--video {
+  background-color: rgba($black, 0.7);
+  border: 2px solid $primary;
+  border-radius: 50%;
+  box-shadow: 0 10px 20px 0 rgba($black, 0.5);
+  color: $white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80px;
+  width: 80px;
+
+  &:hover {
+    background-color: $primary;
+    color: $white;
+  }
+
+  .button__icon {
+    font-size: 28px;
+  }
+}
+
+.button--more {
+  
+}
+
+.button--loading {
+  .button__icon {
+    animation: spin 1000ms ease 0ms infinite normal both;
+  }
+}
+
+.button--finish {
+  .button__icon {
+    display: none;
+  }
+}
+
+.button--font {
+  color: $color-08;
+  font-size: rem(14px);
+  letter-spacing: rem(0.93px);
+
+  &:hover {
+    color: $color-08;
+  }
+
+  &:active {
+    color: $primary;
+  }
+}
+
+.button--font-big {
+  color: rgba($color-08, 0.3);
+  font-size: rem(20px);
+  letter-spacing: rem(1.33px);
+
+  &:hover {
+    color: rgba($color-08, 0.3);
+  }
+
+  &:active {
+    color: $primary;
+  }
+}

@@ -1,0 +1,86 @@
+// Color system
+
+$color-01: #3066B1;
+$color-02: #E2432A;
+$color-03: #73BB32;
+$color-04: #737373;
+$color-05: #782D85;
+$color-06: #EE7C00;
+$color-07: #51D89D;
+$color-08: #3E3E3E;
+
+$white: #FFFFFF;
+// $gray-100: #f8f9fa !default;
+// $gray-200: #e9ecef !default;
+// $gray-300: #dee2e6 !default;
+// $gray-400: #ced4da !default;
+// $gray-500: #adb5bd !default;
+// $gray-600: #6c757d !default;
+// $gray-700: #495057 !default;
+// $gray-800: #343a40 !default;
+// $gray-900: #212529 !default;
+$blacK: #000000;
+
+$primary: $color-01;
+$secondary: $color-02;
+$success: $color-03;
+// $info: $cyan;
+// $warning: $yellow;
+$danger: $color-02;
+// $light: $gray-100;
+// $dark: $gray-800;
+
+// Body
+//
+// Settings for the `<body>` element.
+
+$body-bg: $white;
+$body-color: $color-04;
+
+// Links
+//
+// Style anchor elements.
+
+$link-color: $primary;
+// $link-hover-color: $primary;
+// $link-hover-decoration: none;
+
+// Paragraphs
+//
+// Style p element.
+
+$paragraph-margin-bottom: 0.875rem;
+
+// Typography
+//
+// Font, line-height, and color for body text, headings, and more.
+
+$font-family-base: 'Calibri', sans-serif;
+$font-weight-base: 400;
+$line-height-base: 1.5;
+
+// $headings-font-family: $font-family-sans-serif, sans-serif;
+$headings-font-weight: 700;
+$headings-line-height: 1.3;
+
+$browser-context: 16;
+
+$spacer: 1rem;
+$spacers: () !default;
+
+$spacers: map-merge(
+  (
+    0: 0,
+    1: ($spacer * .25),
+    2: ($spacer * .5),
+    3: ($spacer * .75),
+    4: $spacer,
+    5: ($spacer * 1.25),
+    6: ($spacer * 1.5),
+    7: ($spacer * 2),
+    8: ($spacer * 3),
+    9: ($spacer * 4),
+    10: ($spacer * 5),
+  ),
+  $spacers
+);
